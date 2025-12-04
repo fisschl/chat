@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 用户模型
+/// 存储系统用户的基本信息
+model User {
+  /// 用户唯一标识符
+  /// 使用 UUID v7 作为默认值
+  userId String @id @default(uuid(7))
+
+  /// 用户姓名
+  /// 必填字段，用于显示用户名称
+  userName String
+
+  /// 用户邮箱地址
+  /// 可选字段，具有唯一性约束
+  email String? @unique
+
+  /// 用户手机号码
+  /// 可选字段，具有唯一性约束
+  phone String? @unique
+
+  /// 用户密码
+  /// 必填字段，使用 argon2 加密存储
+  password String
+
+  /// 创建时间
+  /// 自动记录用户创建时间
+  createdAt DateTime @default(now())
+
+  /// 更新时间
+  /// 自动记录用户信息更新时间
+  updatedAt DateTime @updatedAt
+
+  /// 用户的认证令牌
+  /// 一对多关系，一个用户可以拥有多个认证令牌
+  authTokens AuthToken[]
+}
+
+/// 认证令牌模型
+/// 存储用户的认证令牌信息
+model AuthToken {
+  /// 令牌值
+  /// 主键字段，使用 longToken 生成的唯一令牌
+  token String @id
+
+  /// 关联的用户ID
+  /// 必填字段，外键关联到 User 表
+  userId String
+
+  /// 关联的用户
+  /// 必填字段，建立与 User 表的关系
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  /// 创建时间
+  /// 自动记录令牌创建时间
+  createdAt DateTime @default(now())
+
+  /// 过期时间
+  /// 可选字段，令牌过期时间
+  expiresAt DateTime?
+
+  /// 最后使用时间
+  /// 可选字段，记录令牌最后使用时间
+  lastUsedAt DateTime?
+
+  /// 索引：按用户ID查询
+  @@index([userId])
+
+  /// 索引：按过期时间查询
+  @@index([expiresAt])
+}

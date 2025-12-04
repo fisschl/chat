@@ -1,0 +1,43 @@
+{
+  "name": "chat",
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "postinstall": "nuxt prepare",
+    "lint": "oxlint --fix && eslint --cache --fix && nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.78",
+    "@nuxt/eslint": "^1.11.0",
+    "@nuxt/ui": "^4.2.1",
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "@scure/base": "^2.0.0",
+    "argon2": "^0.44.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
+    "nuxt": "^4.2.1",
+    "pg": "^8.16.3",
+    "prisma": "^7.1.0",
+    "radashi": "^12.7.1",
+    "tailwindcss": "^4.1.17",
+    "uuid": "^13.0.0",
+    "vue": "^3.5.25",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.6",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "^1.31.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "jiti": "^2.6.1",
+    "oxlint": "^1.31.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.1.5"
+  }
+}

@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@import "./mi-sans/font.css";
+
+@theme {
+  --font-sans: "MiSans", system-ui;
+}
