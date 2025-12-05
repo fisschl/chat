@@ -1,6 +1,13 @@
 import { getCurrentUser, getAuthToken } from "~~/server/utils/auth";
 import { prisma } from "~~/server/utils/prisma";
 
+/**
+ * 获取当前登录用户信息
+ *
+ * @param event - Nitro 事件对象
+ * @returns 当前用户的基本信息（不包含敏感字段）
+ * @throws 401 错误 - 当用户未登录时
+ */
 export default defineEventHandler(async (event) => {
   // 验证用户认证状态并获取用户信息
   const user = await getCurrentUser(event);
