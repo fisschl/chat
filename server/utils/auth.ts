@@ -1,9 +1,9 @@
 import { db } from "./drizzle";
-import { LOGIN_TOKEN_KEY } from "~~/server/api/auth/login";
 import type { H3Event } from "h3";
 import { first, omit } from "radashi";
 import { authTokens, users } from "~~/db/schema";
 import { and, eq, gt } from "drizzle-orm";
+import { LOGIN_TOKEN_KEY } from "../api/auth/login";
 
 /**
  * 从请求中获取认证令牌
