@@ -1,7 +1,9 @@
-import { prisma } from "./prisma";
+import { db } from "./drizzle";
 import { LOGIN_TOKEN_KEY } from "~~/server/api/auth/login";
 import type { H3Event } from "h3";
-import { omit } from "radashi";
+import { first, omit } from "radashi";
+import { authTokens, users } from "~~/db/schema";
+import { and, eq, gt } from "drizzle-orm";
 
 /**
  * 从请求中获取认证令牌
@@ -23,22 +25,16 @@ export function getAuthToken(event: H3Event) {
  */
 export async function verifyAuthToken(token: string) {
   // 查找有效的令牌
-  const authToken = await prisma.authToken.findFirst({
-    where: {
-      token,
-      expiresAt: {
-        gt: new Date(), // 令牌未过期
-      },
-    },
-    include: {
-      user: true,
-    },
-  });
-
-  if (!authToken) throw createError({ statusCode: 401, message: "用户未登录" });
-
+  const result = await db
+    .select()
+    .from(authTokens)
+    .innerJoin(users, eq(authTokens.userId, users.userId))
+    .where(and(eq(authTokens.token, token), gt(authTokens.expiresAt, new Date())))
+    .limit(1);
+  const user = first(result)?.users;
+  if (!user) throw createError({ statusCode: 401, message: "用户未登录" });
   // 返回用户信息（排除密码）
-  return omit(authToken.user, ["password"]);
+  return omit(user, ["password"]);
 }
 
 /**
@@ -64,9 +60,7 @@ export async function logout(event: H3Event) {
   if (!token) return;
 
   // 从数据库中删除令牌
-  await prisma.authToken.delete({
-    where: { token },
-  });
+  await db.delete(authTokens).where(eq(authTokens.token, token));
 
   // 清除 cookie
   deleteCookie(event, LOGIN_TOKEN_KEY);
