@@ -1,5 +1,7 @@
 import { getCurrentUser, getAuthToken } from "~~/server/utils/auth";
-import { prisma } from "~~/server/utils/prisma";
+import { db } from "~~/server/utils/drizzle";
+import { authTokens } from "~~/db/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * 获取当前登录用户信息
@@ -14,10 +16,7 @@ export default defineEventHandler(async (event) => {
   const token = getAuthToken(event);
 
   // 异步更新令牌的最后使用时间
-  prisma.authToken.update({
-    where: { token: token! },
-    data: { lastUsedAt: new Date() },
-  });
+  db.update(authTokens).set({ lastUsedAt: new Date() }).where(eq(authTokens.token, token!));
 
   // 返回用户信息（排除密码字段）
   return user;

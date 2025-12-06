@@ -1,7 +1,9 @@
 import argon2 from "argon2";
 import { addDays } from "date-fns";
 import { longToken } from "~~/shared/utils/uuid";
-import { prisma } from "~~/server/utils/prisma";
+import { db } from "~~/server/utils/drizzle";
+import { users, authTokens } from "~~/db/schema";
+import { or, eq } from "drizzle-orm";
 import { object, string } from "zod/mini";
 import { omit } from "radashi";
 
@@ -16,16 +18,22 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, LoginRequest.parse);
 
   // 查询匹配的用户（用户名、邮箱、手机号）
-  const users = await prisma.user.findMany({
-    where: {
-      OR: [{ userName: body.loginText }, { email: body.loginText }, { phone: body.loginText }],
-    },
-  });
+  const userList = await db
+    .select()
+    .from(users)
+    .where(
+      or(
+        eq(users.userName, body.loginText),
+        eq(users.email, body.loginText),
+        eq(users.phone, body.loginText),
+      ),
+    );
 
-  if (!users.length) throw createError({ statusCode: 401, message: "用户名、邮箱或手机号不存在" });
+  if (!userList.length)
+    throw createError({ statusCode: 401, message: "用户名、邮箱或手机号不存在" });
 
   const findUser = async () => {
-    for (const user of users) {
+    for (const user of userList) {
       const isPasswordValid = await argon2.verify(user.password, body.password);
       if (isPasswordValid) return user;
     }
@@ -42,12 +50,10 @@ export default defineEventHandler(async (event) => {
   const expiresAt = addDays(new Date(), 60);
 
   // 存储 token 到数据库
-  await prisma.authToken.create({
-    data: {
-      token,
-      userId: user.userId,
-      expiresAt,
-    },
+  await db.insert(authTokens).values({
+    token,
+    userId: user.userId,
+    expiresAt,
   });
 
   // 设置 cookie（60天有效期）
